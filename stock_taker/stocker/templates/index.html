@@ -420,20 +420,31 @@
             rows[i].style.display = rowVisible ? "" : "none"; // rowVisible이 true면 표시, false면 숨김
         }
     }
-    // 아이템 카테고리에 따른 아이템 필터링
     function filterItems() {
-        const selectedIcategory = document.getElementById('icategory_id').value;
-        const items = document.getElementById('item_id').options;
-
-        for (let i = 0; i < items.length; i++) {
-            const itemIcategory = items[i].getAttribute('data-icategory');
-            if (selectedIcategory === "" || itemIcategory === selectedIcategory) {
-                items[i].style.display = 'block';
-            } else {
-                items[i].style.display = 'none';
+        const selectedCategory = document.getElementById('icategorySelect').value;
+        const itemNameInput = document.getElementById('itemNameInput').value.toLowerCase();
+        const table = document.getElementById('itemTable');
+        const rows = table.getElementsByTagName('tr');
+    
+        for (let i = 1; i < rows.length; i++) { // 첫 번째 행은 헤더이므로 1부터 시작
+            const cells = rows[i].getElementsByTagName('td');
+            let rowVisible = true; // 기본적으로 행을 표시
+    
+            // 카테고리 필터링
+            const rowCategory = rows[i].getAttribute('data-categoryi');
+            if (selectedCategory && rowCategory !== selectedCategory) {
+                rowVisible = false;
             }
+    
+            // 아이템 이름 필터링
+            const itemNameCellValue = cells[0]?.textContent.toLowerCase(); // 아이템 이름 셀
+            if (itemNameInput && !itemNameCellValue.includes(itemNameInput)) {
+                rowVisible = false;
+            }
+    
+            // 행의 표시 여부 설정
+            rows[i].style.display = rowVisible ? "" : "none"; // rowVisible이 true면 표시, false면 숨김
         }
-        document.getElementById('item_id').value = ""; // 기본 선택 초기화
     }
 
     // 위치 카테고리에 따른 위치 필터링
