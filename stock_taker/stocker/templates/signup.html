@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 페이지</title>
+    {% load static %}  <!-- static 태그를 사용하기 위해 추가 -->
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <script>
+        window.onload = function() {
+            {% if messages %}
+                {% for message in messages %}
+                    alert("{{ message }}");
+                {% endfor %}
+            {% endif %}
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>회원가입</h1>
+        <form id="signupForm" method="POST" action="{% url 'signup' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">사용자 이름</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="role">역할 선택</label>
+                <select id="role" name="role" required>
+                    <option value="">역할을 선택하세요</option>
+                    <option value="adm">관리자</option>
+                    <option value="user">사용자</option>
+                </select>
+            </div>
+            <button type="submit">회원가입</button>
+        </form>
+        <div id="error-message" class="error-message"></div>
+    </div>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+
+
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>홈페이지</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .box {
+            background: #ffffff;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 0 0 48%; /* 각 폼의 너비를 48%로 설정 */
+        }
+        header {
+            background: #ff6f61;
+            color: #ffffff;
+            padding: 10px 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between; /* 자식 요소들 사이의 공간을 균등하게 분배 */
+            margin: 20px 0;
+            width: 100%; /* 컨테이너의 너비를 100%로 설정 */
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+        h1 {
+            color: #ff6f61;
+            margin-top: 20px;
+        }
+        .form-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin: 20px;
+        }
+        
+        .form-section {
+            flex: 1; /* 각 폼 섹션이 동일한 비율로 공간을 차지하도록 설정 */
+            margin: 10px; /* 각 섹션의 마진을 줄여서 공간을 더 많이 차지하도록 설정 */
+            min-width: 300px; /* 최소 너비를 설정하여 너무 좁아지지 않도록 함 */
+        }
+        form {
+            background: #ffffff;
+            padding: 20px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            flex: 0 0 48%; /* 각 폼의 너비를 48%로 설정 */
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #ff6f61;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #ff4f3d;
+        }
+        .alert {
+            display: none;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #d6d6d6;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li>안녕하세요, {{ username }}님!</li>
+                <li>
+                    <a href="{% url 'index' %}" class="button">기존 페이지로</a>
+                </li>
+                <li><a href="{% url 'logout' %}" style="color: #ffffff;">로그아웃</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <form method="POST" action="{% url 'add_icategory' %}">
+                {% csrf_token %}
+                <h1>아이템 카테고리 추가</h1>
+                <div class="form-group">
+                    <label for="icategory_name">카테고리 이름:</label>
+                    <input type="text" id="icategory_name" name="icategory_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="iicategory_des">카테고리 설명:</label>
+                    <textarea id="iicategory_des" name="iicategory_des" required></textarea>
+                </div>
+                <button type="submit">추가</button>
+            </form>
+
+            <form method="POST" action="{% url 'add_lcategory' %}">
+                {% csrf_token %}
+                <h1>위치 카테고리 추가</h1>
+                <div class="form-group">
+                    <label for="lcategory_name">카테고리 이름:</label>
+                    <input type="text" id="lcategory_name" name="lcategory_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="lcategory_des">카테고리 설명:</label>
+                    <textarea id="lcategory_des" name="lcategory_des" required></textarea>
+                </div>
+                <button type="submit">추가</button>
+            </form>
+        </div>
+
+        <div class="form-container">
+            <form method="POST" action="{% url 'add_item' %}">
+                {% csrf_token %}
+                <h1>아이템 추가</h1>
+                <div class="form-group">
+                    <label for="item_name">아이템 이름:</label>
+                    <input type="text" id="item_name" name="item_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="icategory_id">카테고리 선택:</label>
+                    <select id="icategory_id" name="icategory_id" required>
+                        {% for category in icategories %}
+                            <option value="{{ category.icategory_id }}">{{ category.icategory_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="notifibool">알람 필요:</label>
+                    <input type="checkbox" id="notifibool" name="notifibool">
+                </div>
+                <button type="submit">추가</button>
+            </form>
+
+            <form method="POST" action="{% url 'add_location' %}">
+                {% csrf_token %}
+                <h1>위치 추가</h1>
+                <div class="form-group">
+                    <label for="location_name">위치 이름:</label>
+                    <input type="text" id="location_name" name="location_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="X">가로 크기:</label>
+                    <input type="number" id="X" name="X" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="Y">세로 크기:</label>
+                    <input type="number" id="Y" name="Y" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="Z">높이:</label>
+                    <input type="number" id="Z" name="Z" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="lcategory_id">위치 카테고리 선택:</label>
+                    <select id="lcategory_id" name="lcategory_id" required>
+                        {% for category in lcategories %}
+                            <option value="{{ category.lcategory_id }}">{{ category.lcategory_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="E_N_H">꺼내기 쉬움:</label>
+                    <select id="E_N_H" name="E_N_H" required>
+                        <option value="easy">Easy</option>
+                        <option value="norm">Normal</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <button type="submit">추가</button>
+            </form>
+        </div>
+    </main>
+
+    <div class="form-container">
+        <div class="box">
+            <h1 style = "text-align: center;">사용 기록</h1>
+            <div class="form-group">
+                <label for="categorySelect">카테고리 선택:</label>
+                <select id="categorySelect" style="padding: 10px; width: 100%;">
+                    <option value="all">모두</option>
+                    <option value="activity_id">활동 ID</option>
+                    <option value="user">사용자</option>
+                    <option value="storage">저장소</option>
+                    <option value="quantity">사용 수량</option>
+                    <option value="date">사용 날짜</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchInput">검색:</label>
+                <input type="text" id="searchInput" placeholder="검색..." onkeyup="filterTable()" style="padding: 10px; width: 100%;">
+            </div>
+            <div class="table-container">
+                <table id="activityTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">활동 ID</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용자</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 수량</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 날짜</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                        <tr>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.activity_id }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.user.user_name }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.storage.item.item_name }} ({{ activity.storage.location.location_name }})</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.quantity_activity }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.date_used }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <div class="box">
+            <h1 style = "text-align: center;">알림 기록</h1>
+            <div class="form-group">
+                <label for="categorySelect">카테고리 선택:</label>
+                <select id="categorySelect" style="padding: 10px; width: 100%;">
+                    <option value="all">모두</option>
+                    <option value="activity_id">활동 ID</option>
+                    <option value="user">사용자</option>
+                    <option value="storage">저장소</option>
+                    <option value="quantity">사용 수량</option>
+                    <option value="date">사용 날짜</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="searchInput">검색:</label>
+                <input type="text" id="searchInput" placeholder="검색..." onkeyup="filterTable()" style="padding: 10px; width: 100%;">
+            </div>
+            <div class="table-container">
+                <table id="activityTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">활동 ID</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용자</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 수량</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 날짜</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in activities %}
+                        <tr>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.activity_id }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.user.user_name }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.storage.item.item_name }} ({{ activity.storage.location.location_name }})</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.quantity_activity }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.date_used }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const category = document.getElementById('categorySelect').value;
+            const table = document.getElementById('activityTable');
+            const rows = table.getElementsByTagName('tr');
+    
+            for (let i = 1; i < rows.length; i++) { // 헤더는 제외하고 검색
+                const cells = rows[i].getElementsByTagName('td');
+                let shouldShow = false;
+    
+                if (cells.length > 0) {
+                    switch (category) {
+                        case 'activity_id':
+                            shouldShow = cells[0].textContent.toLowerCase().indexOf(input) > -1;
+                            break;
+                        case 'user':
+                            shouldShow = cells[1].textContent.toLowerCase().indexOf(input) > -1;
+                            break;
+                        case 'storage':
+                            shouldShow = cells[2].textContent.toLowerCase().indexOf(input) > -1;
+                            break;
+                        case 'quantity':
+                            shouldShow = cells[3].textContent.toLowerCase().indexOf(input) > -1;
+                            break;
+                        case 'date':
+                            shouldShow = cells[4].textContent.toLowerCase().indexOf(input) > -1;
+                            break;
+                        default:
+                            shouldShow = Array.from(cells).some(cell => cell.textContent.toLowerCase().indexOf(input) > -1);
+                            break;
+                    }
+                }
+    
+                rows[i].style.display = shouldShow ? '' : 'none';
+            }
+        }
+        $(document).ready(function() {
+            // 아이템 카테고리 추가 폼 제출
+            $('#icategory-form').on('submit', function(event) {  
+                event.preventDefault(); // 기본 제출 방지
+
+                // CSRF 토큰을 가져옵니다.
+                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+                $.post($(this).attr('action'), $(this).serialize() + '&csrfmiddlewaretoken=' + csrfToken, function(response) {
+                    alert('아이템 카테고리가 추가되었습니다!');
+                    // 추가된 카테고리를 화면에 업데이트하는 코드 추가 가능
+                }).fail(function(xhr) {
+                    alert('오류가 발생했습니다: ' + xhr.responseJSON.error);
+                });
+            });
+
+            // 위치 카테고리 추가 폼 제출
+            $('#lcategory-form').on('submit', function(event) {
+                event.preventDefault(); // 기본 제출 방지
+
+                // CSRF 토큰을 가져옵니다.
+                var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+                $.post($(this).attr('action'), $(this).serialize() + '&csrfmiddlewaretoken=' + csrfToken, function(response) {
+                    alert('위치 카테고리가 추가되었습니다!');
+                    // 추가된 카테고리를 화면에 업데이트하는 코드 추가 가능
+                }).fail(function(xhr) {
+                    alert('오류가 발생했습니다: ' + xhr.responseJSON.error);
+                });
+            });
+            // 아이템 추가 폼 제출
+            $('#item-form').on('submit', function(event) {
+                event.preventDefault(); // 기본 제출 방지
+                $.post($(this).attr('action'), $(this).serialize(), function(response) {
+                    alert('아이템이 추가되었습니다!');
+                    // 추가된 아이템을 화면에 업데이트하는 코드 추가 가능
+                });
+            });
+
+            // 위치 추가 폼 제출
+            $('#location-form').on('submit', function(event) {
+                event.preventDefault(); // 기본 제출 방지
+                $.post($(this).attr('action'), $(this).serialize(), function(response) {
+                    alert('위치가 추가되었습니다!');
+                    // 추가된 위치를 화면에 업데이트하는 코드 추가 가능
+                });
+            });
+        });
+        $(document).ready(function() {
+            $('#categoryForm').on('submit', function(event) {
+                event.preventDefault(); // 기본 폼 제출 방지
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/add_icategory/', // URL을 실제 경로로 수정
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#alert').text(response.message).css('color', 'green').fadeIn().delay(3000).fadeOut();
+                    },
+                    error: function(xhr) {
+                        $('#alert').text(xhr.responseJSON.error).css('color', 'red').fadeIn().delay(3000).fadeOut();
+                    }
+                });
+            });
+        });
+    </script>
+    {% if messages %}
+    <script>
+        {% for message in messages %}
+            alert("{{ message }}");
+        {% endfor %}
+    </script>
+{% endif %}
+</body>
+</html>

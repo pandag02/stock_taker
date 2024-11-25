@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈페이지</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+
+                <li>안녕하세요, {{ username }}님!</li>
+                <li><a href="{% url 'logout' %}">로그아웃</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h2>데이터 입력</h2>
+
+        <!-- 카테고리 입력 폼 -->
+        <form method="POST" action="{% url 'submit_categoryi' %}">
+            {% csrf_token %}
+            <h3>카테고리 입력</h3>
+            <label for="category_name">카테고리 이름:</label>
+            <input type="text" id="category_namei" name="category_namei" required>
+            <button type="submit">카테고리 추가</button>
+        </form>
+
+        <!-- 위치 입력 폼 -->
+        <form method="POST" action="{% url 'submit_location' %}">
+            {% csrf_token %}
+            <h3>위치 입력</h3>
+            <label for="x">X 좌표:</label>
+            <input type="number" id="x" name="x" required>
+            <br>
+            <label for="y">Y 좌표:</label>
+            <input type="number" id="y" name="y" required>
+            <br>
+            <label for="z">Z 좌표:</label>
+            <input type="number" id="z" name="z" required>
+            <br>
+            <label for="category_id">카테고리 ID:</label>
+            <input type="number" id="category_id" name="category_id" required>
+            <br>
+            <label for="easy_norm_hard">난이도:</label>
+            <select id="easy_norm_hard" name="easy_norm_hard" required>
+                <option value="easy">쉬움</option>
+                <option value="norm">보통</option>
+                <option value="hard">어려움</option>
+            </select>
+            <br>
+            <button type="submit">위치 추가</button>
+        </form>
+
+        <!-- 아이템 입력 폼 -->
+        <form method="POST" action="{% url 'submit_item' %}">
+            {% csrf_token %}
+            <h3>아이템 입력</h3>
+            <label for="item_name">아이템 이름:</label>
+            <input type="text" id="item_name" name="item_name" required>
+            <br>
+            <label for="item_quantity">수량:</label>
+            <input type="number" id="item_quantity" name="item_quantity" required>
+            <br>
+            <label for="purchase_date">구매 날짜:</label>
+            <input type="date" id="purchase_date" name="purchase_date">
+            <br>
+            <label for="expiration_date">유통 기한:</label>
+            <input type="date" id="expiration_date" name="expiration_date">
+            <br>
+            <label for="item_condition">상태:</label>
+            <select id="item_condition" name="item_condition">
+                <option value="new">새것</option>
+                <option value="used">중고</option>
+                <option value="damaged">손상됨</option>
+            </select>
+            <br>
+            <label for="purchase_user">구매자 ID:</label>
+            <input type="number" id="purchase_user" name="purchase_user">
+            <br>
+            <button type="submit">아이템 추가</button>
+        </form>
+
+        <!-- 저장소 입력 폼 -->
+        <form method="POST" action="{% url 'submit_storage' %}">
+            {% csrf_token %}
+            <h3>저장소 입력</h3>
+            <label for="location_id">위치 ID:</label>
+            <input type="number" id="location_id" name="location_id" required>
+            <br>
+            <label for="item_id">아이템 ID:</label>
+            <input type="number" id="item_id" name="item_id" required>
+            <br>
+            <label for="quantity_stored">저장 수량:</label>
+            <input type="number" id="quantity_stored" name="quantity_stored" required>
+            <br>
+            <label for="date_stored">저장 날짜:</label>
+            <input type="date" id="date_stored" name="date_stored" required>
+            <br>
+            <button type="submit">저장소 추가</button>
+        </form>
+
+        {% if role == 'adm' %}
+        <div>
+            <a href="{% url 'add_adm' %}" class="button">관리자 페이지로 이동</a>
+        </div>
+        {% endif %}
+        
+    </main>
+</body>
+</html>
