@@ -128,34 +128,63 @@
         
         <form method="POST" action="{% url 'store_item' %}">
             <h1>아이템 저장</h1>
-            {% csrf_token %}
-            <label for="item_id">아이템 선택:</label>
-            <select id="item_id" name="item_id" required>
-                {% for item in items %}
-                    <option value="{{ item.item_id }}">{{ item.item_name }}</option>
-                {% endfor %}
-            </select>
-            <label for="location_id">위치 선택:</label>
-            <select id="location_id" name="location_id" required>
-                {% for location in locations %}
-                    <option value="{{ location.location_id }}">{{ location.lcategory.lcategory_name }} 의 {{ location.location_name }}</option>
-                {% endfor %}
-            </select>
 
-            <label for="expired_date">만료 날짜:</label>
-            <input type="date" id="expired_date" name="expired_date" required>
+    {% csrf_token %}
+    
+    <!-- 아이템 카테고리 선택기 -->
+    <label for="icategory_id">아이템 카테고리 선택:</label>
+    <select id="icategory_id" name="icategory_id" onchange="filterItems()" required>
+        <option value="">카테고리 선택</option>
+        {% for icategory in icategories %}
+            <option value="{{ icategory.icategory_id }}">{{ icategory.icategory_name }}</option>
+        {% endfor %}
+    </select>
 
-            <label for="state">상태:</label>
-            <select id="state" name="state" required>
-                <option value="bad">Bad</option>
-                <option value="nor">Normal</option>
-                <option value="good">Good</option>
-            </select>
+    <!-- 아이템 선택기 -->
+    <label for="item_id">아이템 선택:</label>
+    <select id="item_id" name="item_id" required>
+        <option value="">아이템 선택</option>
+        {% for item in items %}
+            <option value="{{ item.item_id }}" data-icategory="{{ item.icategory.icategory_id }}">{{ item.item_name }}</option>
+        {% endfor %}
+    </select>
 
-            <label for="quantity_stored">저장된 개수:</label>
-            <input type="number" id="quantity_stored" name="quantity_stored" min="1" required>
+    <!-- 위치 카테고리 선택기 -->
+    <label for="lcategory_id">위치 카테고리 선택:</label>
+    <select id="lcategory_id" name="lcategory_id" onchange="filterLocations()" required>
+        <option value="">카테고리 선택</option>
+        {% for lcategory in categories %}
+            <option value="{{ lcategory.lcategory_id }}">{{ lcategory.lcategory_name }}</option>
+        {% endfor %}
+    </select>
 
-            <button type="submit">저장</button>
+    <!-- 위치 선택기 -->
+    <label for="location_id">위치 선택:</label>
+    <select id="location_id" name="location_id" required>
+        <option value="">위치 선택</option>
+        {% for location in locations %}
+            <option value="{{ location.location_id }}" data-lcategory="{{ location.lcategory.lcategory_id }}">{{ location.location_name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- 만료 날짜 -->
+    <label for="expired_date">만료 날짜:</label>
+    <input type="date" id="expired_date" name="expired_date" required>
+
+    <!-- 상태 선택 -->
+    <label for="state">상태:</label>
+    <select id="state" name="state" required>
+        <option value="bad">Bad</option>
+        <option value="nor">Normal</option>
+        <option value="good">Good</option>
+    </select>
+
+    <!-- 저장된 개수 -->
+    <label for="quantity_stored">저장된 개수:</label>
+    <input type="number" id="quantity_stored" name="quantity_stored" min="1" required>
+
+    <button type="submit">저장</button>
+
         </form>
     </div>
 
@@ -391,7 +420,37 @@
             rows[i].style.display = rowVisible ? "" : "none"; // rowVisible이 true면 표시, false면 숨김
         }
     }
-    
+    // 아이템 카테고리에 따른 아이템 필터링
+    function filterItems() {
+        const selectedIcategory = document.getElementById('icategory_id').value;
+        const items = document.getElementById('item_id').options;
+
+        for (let i = 0; i < items.length; i++) {
+            const itemIcategory = items[i].getAttribute('data-icategory');
+            if (selectedIcategory === "" || itemIcategory === selectedIcategory) {
+                items[i].style.display = 'block';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+        document.getElementById('item_id').value = ""; // 기본 선택 초기화
+    }
+
+    // 위치 카테고리에 따른 위치 필터링
+    function filterLocations() {
+        const selectedLcategory = document.getElementById('lcategory_id').value;
+        const locations = document.getElementById('location_id').options;
+
+        for (let i = 0; i < locations.length; i++) {
+            const locationLcategory = locations[i].getAttribute('data-lcategory');
+            if (selectedLcategory === "" || locationLcategory === selectedLcategory) {
+                locations[i].style.display = 'block';
+            } else {
+                locations[i].style.display = 'none';
+            }
+        }
+        document.getElementById('location_id').value = ""; // 기본 선택 초기화
+    }
 
     function filterTable() {
         const selectedCategory = document.getElementById('categorySelect').value;

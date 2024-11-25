@@ -353,14 +353,9 @@ def recommend_storage(request):
 
 
 def get_items_and_locations(request):
-    icategory_id = request.GET.get('icategory_id')
-    lcategory_id = request.GET.get('lcategory_id')
-
-    # 선택된 아이템 카테고리에 따라 아이템 필터링
-    items = Item.objects.filter(icategory_id=icategory_id).values('item_id', 'item_name') if icategory_id else []
-
-    # 선택된 위치 카테고리에 따라 위치 필터링
-    locations = Location.objects.filter(lcategory_id=lcategory_id).values('location_id', 'location_name') if lcategory_id else []
+    category_id = request.GET.get('category_id')
+    items = Item.objects.filter(category_id=category_id).values('item_id', 'item_name')
+    locations = Location.objects.filter(lcategory_id=category_id).values('location_id', 'location_name', 'lcategory__lcategory_name')
 
     return JsonResponse({
         'items': list(items),

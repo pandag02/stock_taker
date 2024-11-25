@@ -41,6 +41,7 @@ urlpatterns = [
     path('use_item/', views.use_item, name='use_item'),
     path('recommend_storage/', views.recommend_storage, name='recommend_storage'),
     path('get_items_and_locations/', views.get_items_and_locations, name='get_items_and_locations'),
-
-
+    
+    
+    
 ]
