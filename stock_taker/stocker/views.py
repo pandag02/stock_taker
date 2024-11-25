@@ -288,32 +288,39 @@ def use_item(request):
     if request.method == 'POST':
         storage_id = request.POST.get('storage_id')
         quantity_activity = request.POST.get('quantity_activity')
-        date_used = date.today() #입력 날짜를 기준으로 저장된 날짜를 넣음. 
+        date_used = date.today()  # 사용된 날짜를 저장
         user_id = request.session.get('user_id')
-        
+
         try:
             with connection.cursor() as cursor:
                 cursor.execute(
                     "CALL combine_quantity_activity_procedure(%s, %s, %s, %s)",
-                    [user_id, storage_id, quantity_activity, date_used]  # 변수 이름 수정
+                    [user_id, storage_id, quantity_activity, date_used]
                 )
-            messages.success(request, '사용 되었습니다.')
+            messages.success(request, '아이템이 성공적으로 사용되었습니다.')
             return redirect('index')
 
         except IntegrityError:
-            # IntegrityError는 주로 중복된 프라이머리 키로 인해 발생
-            messages.error(request, '이미 존재하는 데이터 입니다.')
+            messages.error(request, '잘못된 요청입니다. 다시 시도하세요.')
             return redirect('index')
 
         except Exception as e:
-            print(f"Error occurred: {e}")  # 또는 logging.error(f"Error occurred: {e}")
-            messages.error(request, '아이템 추가 중 오류가 발생했습니다: {}'.format(str(e)))
+            messages.error(request, f'오류 발생: {e}')
             return redirect('index')
-        
-        return JsonResponse({"message": "저장 되었습니다."})
 
-    storages = Storage.objects.all()
-    return render(request, 'index', {'items': items, 'locations': locations})
+    # 카테고리, 아이템, 저장된 아이템 정보 불러오기
+    icategories = Icategory.objects.all()
+    items = Item.objects.all()
+    storages = Storage.objects.select_related('item', 'location').all()
+
+    return render(request, 'use_item.html', {
+        'icategories': icategories,
+        'items': items,
+        'storages': storages
+    })
+    
+    
+    
 
 def recommend_storage(request):
     if request.method == 'GET':

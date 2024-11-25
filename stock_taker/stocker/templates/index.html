@@ -193,16 +193,41 @@
         <form method="POST" action="{% url 'use_item' %}">
             <h1>아이템 사용</h1>
             {% csrf_token %}
-            <label for="storage_id">저장된 아이템 선택:</label>
-            <select id="storage_id" name="storage_id" required>
-                {% for storage in storages %}
-                    <option value="{{ storage.storage_id }}"> {{storage.quantity_stored}}개 {{ storage.item.item_name }} at {{ storage.location.location_name }} at {{storage.expired_date}}</option>
+            
+            <!-- 카테고리 선택 -->
+            <label for="icategorySelect">아이템 카테고리 선택:</label>
+            <select id="icategorySelect" name="icategory_id" onchange="filterItemsByCategory()" required>
+                <option value="">카테고리 선택</option>
+                {% for category in icategories %}
+                    <option value="{{ category.icategory_id }}">{{ category.icategory_name }}</option>
                 {% endfor %}
             </select>
-
+        
+            <!-- 아이템 선택 -->
+            <label for="itemSelect">아이템 선택:</label>
+            <select id="itemSelect" name="item_id" onchange="filterStoragesByItem()" required>
+                <option value="">아이템 선택</option>
+                {% for item in items %}
+                    <option value="{{ item.item_id }}" data-category="{{ item.icategory.icategory_id }}">
+                        {{ item.item_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <!-- 저장된 아이템 목록 -->
+            <label for="storage_id">저장된 위치 선택:</label>
+            <select id="storageSelect" name="storage_id" required>
+                <option value="">저장된 아이템 선택</option>
+                {% for storage in storages %}
+                    <option value="{{ storage.storage_id }}" data-item="{{ storage.item.item_id }}">
+                        {{ storage.quantity_stored }}개 {{ storage.item.item_name }} at {{ storage.location.location_name }} (만료: {{ storage.expired_date }})
+                    </option>
+                {% endfor %}
+            </select>
+        
             <label for="quantity_activity">사용할 개수:</label>
             <input type="number" id="quantity_activity" name="quantity_activity" min="1" required>
-
+        
             <button type="submit">사용</button>
         </form>
     </div>
@@ -461,6 +486,33 @@
             }
         }
         document.getElementById('location_id').value = ""; // 기본 선택 초기화
+    }
+
+
+    function filterItemsByCategory() {
+        const selectedCategory = document.getElementById('icategorySelect').value;
+        const itemSelect = document.getElementById('itemSelect');
+        const items = itemSelect.getElementsByTagName('option');
+
+        for (let i = 0; i < items.length; i++) {
+            const itemCategory = items[i].getAttribute('data-category');
+            items[i].style.display = selectedCategory === "" || itemCategory === selectedCategory ? "" : "none";
+        }
+
+        // 카테고리 변경 시 아이템 선택 초기화
+        itemSelect.selectedIndex = 0;
+        filterStoragesByItem(); // 아이템 선택 초기화에 맞춰 저장 목록도 초기화
+    }
+
+    function filterStoragesByItem() {
+        const selectedItem = document.getElementById('itemSelect').value;
+        const storageSelect = document.getElementById('storageSelect');
+        const storages = storageSelect.getElementsByTagName('option');
+
+        for (let i = 0; i < storages.length; i++) {
+            const storageItem = storages[i].getAttribute('data-item');
+            storages[i].style.display = selectedItem === "" || storageItem === selectedItem ? "" : "none";
+        }
     }
 
     function filterTable() {
