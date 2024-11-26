@@ -198,3 +198,19 @@ class User(models.Model):
     class Meta:
         managed = False
         db_table = 'user'
+        
+        
+
+class Notifications(models.Model):
+    notification_id = models.AutoField(primary_key=True)
+    item = models.ForeignKey(Item, models.DO_NOTHING, blank=True, null=True)
+    storage = models.ForeignKey('Storage', models.DO_NOTHING, blank=True, null=True)
+    notification_type = models.CharField(max_length=10)
+    notification_message = models.CharField(max_length=255)
+    notification_status = models.CharField(max_length=7, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'notifications'

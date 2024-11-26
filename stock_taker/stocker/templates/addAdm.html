@@ -338,46 +338,54 @@
             </div>
         </div>
     
+
+
+
+
         <div class="box">
             <h1 style = "text-align: center;">알림 기록</h1>
             <div class="form-group">
                 <label for="categorySelect">카테고리 선택:</label>
                 <select id="categorySelect" style="padding: 10px; width: 100%;">
                     <option value="all">모두</option>
-                    <option value="activity_id">활동 ID</option>
-                    <option value="user">사용자</option>
-                    <option value="storage">저장소</option>
-                    <option value="quantity">사용 수량</option>
-                    <option value="date">사용 날짜</option>
+                    <option value="item">아이템</option>
+                    <option value="repository">저장소</option>
+                    <option value="notification_type">알림 타입</option>
+                    <option value="notification_message">알림 메시지</option>
+                    <option value="status">상태</option>
+                    <option value="updated_at">업데이트 날짜</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="searchInput">검색:</label>
-                <input type="text" id="searchInput" placeholder="검색..." onkeyup="filterTable()" style="padding: 10px; width: 100%;">
+                <label for="searchInputN">검색:</label>
+                <input type="text" id="searchInputN" placeholder="검색..." onkeyup="filterNotifications()" style="padding: 10px; width: 100%;">
             </div>
             <div class="table-container">
-                <table id="activityTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <table id="notificationTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                     <thead>
                         <tr>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">활동 ID</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용자</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">아이템</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 수량</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 날짜</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">알림 타입</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">알림 메시지</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">상태</th>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">업데이트 날짜</th>
+                                                                                        
                         </tr>
                     </thead>
                     <tbody>
-                        {% for activity in activities %}
+                        {% for notification in notifications %}
                         <tr>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.activity_id }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.user.user_name }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.storage.item.item_name }} ({{ activity.storage.location.location_name }})</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.quantity_activity }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.date_used }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.item.item_name }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;"> {{ notification.storage.location.lcategory.lcategory_name }}의 {{ notification.storage.location.location_name }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_type}}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_message }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_status }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.updated_at }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
+                            <td colspan="6" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -387,7 +395,37 @@
     </div>
 
 
+
+
+
     <script>
+        function filterNotifications() {
+            const input = document.getElementById('searchInputN');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('notificationTable');
+            const tr = table.getElementsByTagName('tr');
+    
+            for (let i = 1; i < tr.length; i++) { // 첫 번째 행은 헤더이므로 1부터 시작
+                const td = tr[i].getElementsByTagName('td');
+                let rowContainsFilter = false;
+    
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                            rowContainsFilter = true;
+                            break; // 하나라도 일치하면 더 이상 확인할 필요 없음
+                        }
+                    }
+                }
+    
+                // 필터가 비어있을 경우 모든 행을 표시
+                tr[i].style.display = (filter === "" || rowContainsFilter) ? "" : "none"; // 일치하면 보이고, 아니면 숨김
+            }
+        }
+        
+
+
         function filterTable() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             const category = document.getElementById('categorySelect').value;

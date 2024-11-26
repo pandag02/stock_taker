@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import User, Location, Item, Storage, Storage, Activity, Icategory, Lcategory
+from .models import User, Location, Item, Storage, Storage, Activity, Icategory, Lcategory, Notifications
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.db import connection,  IntegrityError
@@ -111,7 +111,8 @@ def add_adm(request):
     activities = Activity.objects.all()
     items = Item.objects.all()
     locations = Location.objects.all()
-    return render(request, 'addADM.html', { 'items': items, 'locations':locations, 'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities})
+    notifications = Notifications.objects.all()
+    return render(request, 'addADM.html', { 'items': items, 'locations':locations, 'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities, 'notifications': notifications})
 
 
 #=================================================================
