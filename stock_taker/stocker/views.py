@@ -11,6 +11,7 @@ from django.http import JsonResponse  # JsonResponse를 임포트합니다.
 from datetime import date
 from django.db.models import Sum, Count, Q  # Sum을 임포트합니다.
 import json  # json 모듈 임포트
+from django.core.mail import send_mail
 
 #=================================================================
 #=================================================================
@@ -361,6 +362,46 @@ def delete_notifications(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+def email_notifications(request): #사용자 선택하는 기능 추가 
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            notification_ids = data.get("notification_ids", [])
+            
+            # 알림이 존재하는 경우
+            if notification_ids:
+                # 해당 알림들의 메시지 가져오기
+                notifications = Notifications.objects.filter(notification_id__in=notification_ids)
+                notification_messages = [notif.notification_message for notif in notifications]
+
+                # 'admin' 역할을 가진 사용자에게 이메일 보내기
+                admin_users = User.objects.filter(role='adm')
+                email_addresses = [user.email for user in admin_users if user.email]  # 이메일이 있는 사용자만
+
+                if email_addresses:
+                    # 삭제된 알림 메시지를 문자열로 변환
+                    notification_messages_str = ', '.join(notification_messages)
+                    email_subject = '[재고 관리기 알림] 재고에 문제가 생겼습니다.'
+                    email_body = f'다음 재고에 문제가 발생하였습니다: {notification_messages_str}'
+
+                    # 이메일 발송
+                    send_mail(
+                        email_subject,
+                        email_body,
+                        'panda_g02@naver.com',  # 발신자 이메일 주소
+                        email_addresses,
+                        fail_silently=False,
+                    )
+
+                messages.success(request, '관리자에게 이메일이 발송되었습니다.')
+                return JsonResponse({'success': True, 'message': '이메일을 발송하였습니다.'})
+            else:
+                return JsonResponse({'success': False, 'error': '보낼 알림 ID가 없습니다.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 #=================================================================
 #=================================================================

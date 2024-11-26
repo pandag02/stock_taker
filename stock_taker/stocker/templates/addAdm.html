@@ -363,6 +363,14 @@
             <div style="text-align: center; margin-top: 20px;">
                 <button onclick="deleteSelected()" style="padding: 10px 20px; background-color: #ff6f61; color: white; border: none; cursor: pointer;">선택한 항목 삭제</button>
             </div>
+
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="emailSelected()" style="padding: 10px 20px; background-color: #ff6f61; color: white; border: none; cursor: pointer;">선택한 항목 이메일 보내기</button>
+            </div>
+
+
+
             <div class="table-container">
                 <table id="notificationTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                     <thead>
@@ -404,6 +412,42 @@
 
 
     <script>
+        function emailSelected() {
+            var selectedIds = [];
+            var checkboxes = document.querySelectorAll('.delete-checkbox:checked');
+            checkboxes.forEach(function(checkbox) {
+                selectedIds.push(checkbox.value);
+            });
+        
+            if (selectedIds.length > 0) {
+                // Ajax로 서버에 삭제 요청 보내기
+                fetch("{% url 'email_notifications' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 포함
+                    },
+                    body: JSON.stringify({ 'notification_ids': selectedIds })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 삭제가 성공하면, 페이지를 새로 고침하여 변경된 내용을 반영
+                        location.reload();
+                    } else {
+                        alert('발송에 실패했습니다: ' + data.error);  // 오류 메시지 출력
+                    }
+                })
+                .catch(error => {
+                    alert('서버와의 통신 중 오류가 발생했습니다: ' + error.message);
+                });
+            } else {
+                alert('이메일을 보낼 항목을 선택해주세요.');
+            }
+        }
+
+
+
         function deleteSelected() {
             var selectedIds = [];
             var checkboxes = document.querySelectorAll('.delete-checkbox:checked');

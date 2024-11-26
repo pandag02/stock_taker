@@ -129,3 +129,15 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.naver.com'  # 네이버 SMTP 서버
+EMAIL_PORT = 465  # SSL을 사용할 때 포트 번호
+EMAIL_USE_SSL = True  # SSL 사용 설정
+EMAIL_USE_TLS = False  # SSL을 사용하는 경우 TLS는 False로 설정
+EMAIL_HOST_USER = 'panda_g02@naver.com'  # 네이버 이메일 주소
+EMAIL_HOST_PASSWORD = 'W5XNVSEHVF2D'  # 네이버 이메일 계정 비밀번호
+DEFAULT_FROM_EMAIL = 'panda_g02@naver.com'  # 발신자 이메일 주소
+
