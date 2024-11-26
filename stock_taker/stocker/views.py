@@ -113,7 +113,8 @@ def add_adm(request):
     items = Item.objects.all()
     locations = Location.objects.all()
     notifications = Notifications.objects.all()
-    return render(request, 'addADM.html', { 'items': items, 'locations':locations, 'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities, 'notifications': notifications})
+    users = User.objects.all()
+    return render(request, 'addADM.html', { 'items': items, 'locations':locations, 'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities, 'notifications': notifications, 'users': users})
 
 
 #=================================================================
@@ -362,23 +363,23 @@ def delete_notifications(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
-def email_notifications(request): #사용자 선택하는 기능 추가 
+def email_notifications(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             notification_ids = data.get("notification_ids", [])
+            user_id = data.get("user_id")  # 요청에서 사용자 ID 가져오기
             
             # 알림이 존재하는 경우
-            if notification_ids:
+            if notification_ids and user_id:
                 # 해당 알림들의 메시지 가져오기
                 notifications = Notifications.objects.filter(notification_id__in=notification_ids)
                 notification_messages = [notif.notification_message for notif in notifications]
 
-                # 'admin' 역할을 가진 사용자에게 이메일 보내기
-                admin_users = User.objects.filter(role='adm')
-                email_addresses = [user.email for user in admin_users if user.email]  # 이메일이 있는 사용자만
-
-                if email_addresses:
+                # 요청받은 사용자 ID에 해당하는 사용자 찾기
+                recipient_user = User.objects.filter(user_id=user_id).first()
+                
+                if recipient_user and recipient_user.email:  # 사용자 존재 및 이메일이 있는지 확인
                     # 삭제된 알림 메시지를 문자열로 변환
                     notification_messages_str = ', '.join(notification_messages)
                     email_subject = '[재고 관리기 알림] 재고에 문제가 생겼습니다.'
@@ -389,14 +390,17 @@ def email_notifications(request): #사용자 선택하는 기능 추가
                         email_subject,
                         email_body,
                         'panda_g02@naver.com',  # 발신자 이메일 주소
-                        email_addresses,
+                        [recipient_user.email],  # 수신자 이메일 주소
                         fail_silently=False,
                     )
 
-                messages.success(request, '관리자에게 이메일이 발송되었습니다.')
-                return JsonResponse({'success': True, 'message': '이메일을 발송하였습니다.'})
+                    messages.success(request, '선택한 사용자에게 이메일이 발송되었습니다.')
+                    return JsonResponse({'success': True, 'message': '이메일을 발송하였습니다.'})
+                else:
+                    return JsonResponse({'success': False, 'error': '유효한 사용자 또는 이메일이 없습니다.'})
+
             else:
-                return JsonResponse({'success': False, 'error': '보낼 알림 ID가 없습니다.'})
+                return JsonResponse({'success': False, 'error': '보낼 알림 ID 또는 사용자 ID가 없습니다.'})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
