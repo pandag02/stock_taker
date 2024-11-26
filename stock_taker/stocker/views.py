@@ -326,6 +326,15 @@ def recommend_storage(request):
         item_size_x = float(request.GET.get('item_size_x'))
         item_size_y = float(request.GET.get('item_size_y'))
         item_size_z = float(request.GET.get('item_size_z'))
+        
+        # 아이템 이름이 일치하는 것이 있는지 확인
+        item_exists = Item.objects.filter(item_name=item_name).exists()  # item_name 필드를 사용합니다.
+
+        if not item_exists:
+            # 아이템이 존재하지 않을 경우 알림 메시지 추가
+            messages.error(request, "아이템이 존재하지 않습니다.")
+            # 리다이렉트할 URL을 지정합니다. 예를 들어, 'index'라는 이름의 URL로 리다이렉트
+            return redirect('index')  # 'index'는 실제 리다이렉트할 URL의 이름으로 변경해야 합니다.
 
         # 같은 이름의 아이템이 가장 많이 저장된 위치를 찾기
         most_common_location = (
@@ -338,6 +347,7 @@ def recommend_storage(request):
         
         if most_common_location:
             location_id_many = most_common_location.location.location_name
+            location_name_many= most_common_location.location.lcategory.lcategory_name
         else:
             location_id_many = "없음"
             
@@ -361,10 +371,13 @@ def recommend_storage(request):
             
             # 상위 3개 선택 (3개 이하일 경우 모두 선택)
             location_id_simil = [loc.location_name for loc in sorted_locations[:3]]
+            location_cate_simil = [loc.lcategory.lcategory_name for loc in sorted_locations[:3]]
             
+
             # 리스트를 문장으로 변환
             if location_id_simil:
-                location_sentence =  ", ".join(location_id_simil)
+                # lcategory_name과 location_name을 조합하여 문장 생성
+                location_sentence = ", ".join(f"{cate}의 {name}" for cate, name in zip(location_cate_simil, location_id_simil))
             else:
                 location_sentence = "추천 위치가 없습니다."
         else:
@@ -372,7 +385,7 @@ def recommend_storage(request):
 
         
         # 추천 결과를 템플릿에 전달합니다.
-        messages.success(request, f"가장 많이 저장된 위치: {location_id_many}, 들어갈 수 있는 위치: {location_sentence}")
+        messages.success(request, f"가장 많이 저장된 위치:{location_name_many}의 {location_id_many}, 들어갈 수 있는 위치: {location_sentence}")
         return redirect('index')
 
     # GET 요청이 아닐 경우, 기본 템플릿을 반환합니다.
