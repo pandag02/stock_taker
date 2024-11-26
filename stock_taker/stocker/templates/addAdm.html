@@ -150,10 +150,6 @@
                 {% csrf_token %}
                 <h1>아이템 추가</h1>
                 <div class="form-group">
-                    <label for="item_name">아이템 이름:</label>
-                    <input type="text" id="item_name" name="item_name" required>
-                </div>
-                <div class="form-group">
                     <label for="icategory_id">카테고리 선택:</label>
                     <select id="icategory_id" name="icategory_id" required>
                         {% for category in icategories %}
@@ -161,6 +157,11 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="form-group">
+                    <label for="item_name">아이템 이름:</label>
+                    <input type="text" id="item_name" name="item_name" required>
+                </div>
+                
                 <div class="form-group">
                     <label for="notifibool">알람 필요:</label>
                     <input type="checkbox" id="notifibool" name="notifibool">
@@ -171,6 +172,14 @@
             <form method="POST" action="{% url 'add_location' %}">
                 {% csrf_token %}
                 <h1>위치 추가</h1>
+                <div class="form-group">
+                    <label for="lcategory_id">위치 카테고리 선택:</label>
+                    <select id="lcategory_id" name="lcategory_id" required>
+                        {% for category in lcategories %}
+                            <option value="{{ category.lcategory_id }}">{{ category.lcategory_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                 <div class="form-group">
                     <label for="location_name">위치 이름:</label>
                     <input type="text" id="location_name" name="location_name" required>
@@ -187,14 +196,7 @@
                     <label for="Z">높이:</label>
                     <input type="number" id="Z" name="Z" min="1" required>
                 </div>
-                <div class="form-group">
-                    <label for="lcategory_id">위치 카테고리 선택:</label>
-                    <select id="lcategory_id" name="lcategory_id" required>
-                        {% for category in lcategories %}
-                            <option value="{{ category.lcategory_id }}">{{ category.lcategory_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                
                 <div class="form-group">
                     <label for="E_N_H">꺼내기 쉬움:</label>
                     <select id="E_N_H" name="E_N_H" required>
@@ -207,6 +209,53 @@
             </form>
         </div>
     </main>
+
+    <main>
+        <!-- 아이템 카테고리 삭제 -->
+        <div class="form-container">
+            <form method="POST" action="{% url 'delete_icategory' %}">
+                <h1>아이템 카테고리 삭제</h1>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="icategory_select">삭제할 카테고리 선택:</label>
+                    <select id="icategory_select" name="icategory_id" required>
+                        <option value="">-- 선택하세요 --</option>
+                        {% for category in icategories %}
+                            <option value="{{ category.icategory_id }}">{{ category.icategory_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit">삭제</button>
+            </form>
+
+            <!-- 위치 카테고리 삭제 -->
+            <form method="POST" action="{% url 'delete_lcategory' %}">
+                <h1>위치 카테고리 삭제</h1>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="lcategory_select">삭제할 위치 카테고리 선택:</label>
+                    <select id="lcategory_select" name="lcategory_id" required>
+                        <option value="">-- 선택하세요 --</option>
+                        {% for category in lcategories %}
+                            <option value="{{ category.lcategory_id }}">{{ category.lcategory_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit">삭제</button>
+            </form>
+
+        </div>
+
+
+    </main>
+    
+
+
+
+
+
+
+
 
     <div class="form-container">
         <div class="box">

@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password, check_password  # check_p
 from django.http import JsonResponse  # JsonResponse를 임포트합니다.
 from datetime import date
 from django.db.models import Sum, Count, Q  # Sum을 임포트합니다.
+
 #=================================================================
 #=================================================================
 #로그인, 로그아웃, 관리자 계정 접속 관련 코드 
@@ -242,6 +243,56 @@ def add_location(request):
     lcategories = LCategory.objects.all()
     return JsonResponse({"lcategories": list(lcategories.values())})
 
+@csrf_exempt
+def delete_icategory(request):
+    username = request.session.get('username')  # 세션에서 사용자 이름 가져오기
+    if request.method == 'POST':
+        icategory_id = request.POST.get('icategory_id')  # 드롭다운에서 선택된 아이템 카테고리 ID 가져오기
+        if icategory_id:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM icategory WHERE icategory_id = %s", [icategory_id]
+                    )
+                messages.success(request, '아이템 카테고리가 성공적으로 삭제되었습니다.')
+            except IntegrityError:
+                messages.error(request, '이미 사용 중인 아이템 카테고리입니다. 삭제할 수 없습니다.')
+            except Exception as e:
+                messages.error(request, '카테고리 삭제 중 오류가 발생했습니다: {}'.format(str(e)))
+
+        # 카테고리 목록을 다시 로드
+        icategories = Icategory.objects.all()
+        lcategories = Lcategory.objects.all()
+        return redirect('add_adm')
+
+    return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
+
+@csrf_exempt
+def delete_lcategory(request):
+    username = request.session.get('username')  # 세션에서 사용자 이름 가져오기
+    if request.method == 'POST':
+        lcategory_id = request.POST.get('lcategory_id')  # 드롭다운에서 선택된 위치 카테고리 ID 가져오기
+        if lcategory_id:
+            try:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM lcategory WHERE lcategory_id = %s", [lcategory_id]
+                    )
+                messages.success(request, '위치 카테고리가 성공적으로 삭제되었습니다.')
+            except IntegrityError:
+                messages.error(request, '이미 사용 중인 위치 카테고리입니다. 삭제할 수 없습니다.')
+            except Exception as e:
+                messages.error(request, '카테고리 삭제 중 오류가 발생했습니다: {}'.format(str(e)))
+
+        # 카테고리 목록을 다시 로드
+        icategories = Icategory.objects.all()
+        lcategories = Lcategory.objects.all()
+        return redirect('add_adm')
+
+    return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
+
+
+
 #=================================================================
 #=================================================================
 #index.html에서 사용할 것.
@@ -319,7 +370,6 @@ def use_item(request):
         'storages': storages
     })
      
-
 def recommend_storage(request):
     if request.method == 'GET':
         item_name = request.GET.get('item_name')
@@ -390,7 +440,6 @@ def recommend_storage(request):
 
     # GET 요청이 아닐 경우, 기본 템플릿을 반환합니다.
     return redirect('index')
-
 
 def get_items_and_locations(request):
     category_id = request.GET.get('category_id')

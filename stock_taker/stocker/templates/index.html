@@ -236,6 +236,43 @@
 
 
 
+
+<div class="container">
+
+    
+    <form method="GET" action="{% url 'recommend_storage' %}">
+        <h1>아이템 저장 위치 추천</h1>
+        <div class="form-group">
+            <label for="itemName">아이템 이름:</label>
+            <input type="text" id="itemName" name="item_name" placeholder="아이템 이름 입력..." required>
+        </div>
+        <div class="form-group">
+            <label for="itemSizeX">아이템 가로 크기:</label>
+            <input type="number" id="itemSizeX" name="item_size_x" placeholder="가로 크기 입력..." required>
+        </div>
+        <div class="form-group">
+            <label for="itemSizeY">아이템 세로 크기:</label>
+            <input type="number" id="itemSizeY" name="item_size_y" placeholder="세로 크기 입력..." required>
+        </div>
+        <div class="form-group">
+            <label for="itemSizeZ">아이템 높이:</label>
+            <input type="number" id="itemSizeZ" name="item_size_z" placeholder="높이 입력..." required>
+        </div>
+        <button type="submit">추천 받기</button>
+    </form>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
 <div class="container">
     <div class="box">
         <h1 style="text-align: center;">위치 찾기</h1>
@@ -332,41 +369,6 @@
             </table>
         </div>
     </div>
-</div>
-
-<div class="container">
-
-    
-    <form method="GET" action="{% url 'recommend_storage' %}">
-        <h1>아이템 저장 위치 추천</h1>
-        <div class="form-group">
-            <label for="itemName">아이템 이름:</label>
-            <input type="text" id="itemName" name="item_name" placeholder="아이템 이름 입력..." required>
-        </div>
-        <div class="form-group">
-            <label for="itemSizeX">아이템 가로 크기:</label>
-            <input type="number" id="itemSizeX" name="item_size_x" placeholder="가로 크기 입력..." required>
-        </div>
-        <div class="form-group">
-            <label for="itemSizeY">아이템 세로 크기:</label>
-            <input type="number" id="itemSizeY" name="item_size_y" placeholder="세로 크기 입력..." required>
-        </div>
-        <div class="form-group">
-            <label for="itemSizeZ">아이템 높이:</label>
-            <input type="number" id="itemSizeZ" name="item_size_z" placeholder="높이 입력..." required>
-        </div>
-        <button type="submit">추천 받기</button>
-    </form>
-    {% if locations %}
-        <h2>추천된 위치:</h2>
-        <ul>
-            {% for location in locations %}
-                <li>{{ location.location_name }}</li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>추천된 위치가 없습니다.</p>
-    {% endif %}
 </div>
 
 
