@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password, check_password  # check_password 임포트 추가
 from django.http import JsonResponse  # JsonResponse를 임포트합니다.
 from datetime import date
-from django.db.models import Sum  # Sum을 임포트합니다.
+from django.db.models import Sum, Count, Q  # Sum을 임포트합니다.
 #=================================================================
 #=================================================================
 #로그인, 로그아웃, 관리자 계정 접속 관련 코드 
@@ -318,45 +318,65 @@ def use_item(request):
         'items': items,
         'storages': storages
     })
-    
-    
-    
+     
 
 def recommend_storage(request):
     if request.method == 'GET':
         item_name = request.GET.get('item_name')
-        item_size_x = float(request.GET.get('item_size_x', 0))
-        item_size_y = float(request.GET.get('item_size_y', 0))
-        item_size_z = float(request.GET.get('item_size_z', 0))
+        item_size_x = float(request.GET.get('item_size_x'))
+        item_size_y = float(request.GET.get('item_size_y'))
+        item_size_z = float(request.GET.get('item_size_z'))
 
-        # 해당 이름의 아이템 찾기
-        item = Item.objects.filter(item_name=item_name).first()
-
-        if item is not None:  # item이 None이 아닐 경우에만 진행
-            # 1순위: 해당 아이템이 가장 많이 있는 위치 찾기
-            storage_data = Storage.objects.filter(item_id=item.item_id).values('location_id').annotate(total_quantity=Sum('quantity_stored')).order_by('-total_quantity')
-            most_stored_location = None
-            if storage_data:
-                # 가장 많이 저장된 위치의 ID를 가져와서 Location 객체를 찾음
-                most_stored_location_id = storage_data[0]['location_id']
-                most_stored_location = Location.objects.get(pk=most_stored_location_id)
-
-            # 2순위: 크기가 맞는 위치 찾기
-            compatible_locations = Location.objects.filter(x__gte=item_size_x, y__gte=item_size_y, z__gte=item_size_z)
-
-            return JsonResponse({
-                "message": {
-                    'item': item.item_name,
-                    'most_stored_location': most_stored_location.location_name if most_stored_location else None,  # 필드 이름 수정
-                    'compatible_locations': [location.location_name for location in compatible_locations],
-                }
-            })
+        # 같은 이름의 아이템이 가장 많이 저장된 위치를 찾기
+        most_common_location = (
+            Storage.objects
+            .filter(item__item_name=item_name)  # 아이템 이름으로 필터링
+            .annotate(item_count=Count('item_id'))  # 각 위치에 저장된 아이템 수를 계산
+            .order_by('-item_count')  # 아이템 수가 많은 순서로 정렬
+            .first()  # 가장 많은 아이템이 저장된 위치를 가져옴
+        )
+        
+        if most_common_location:
+            location_id_many = most_common_location.location.location_name
         else:
-            return JsonResponse({"message": "오류 발생: 아이템을 찾을 수 없습니다."})
+            location_id_many = "없음"
+            
 
-    return JsonResponse({"message": "잘못된 요청입니다."})
+        # 아이템 크기와 가장 유사한 저장 공간 찾기
+        similar_locations = (
+            Location.objects
+            .annotate(
+                size_difference=(
+                    Q(x__gte=item_size_x) & Q(y__gte=item_size_y) & Q(z__gte=item_size_z)
+                )
+            )
+            .filter(size_difference=True)  # 크기가 충분한 저장 공간 필터링
+        )
+        if similar_locations.exists():
+            # 크기 차이를 계산하여 정렬
+            sorted_locations = sorted(
+                similar_locations,
+                key=lambda loc: (float(loc.x) - float(item_size_x)) ** 2 + (float(loc.y) - float(item_size_y)) ** 2 + (float(loc.z) - float(item_size_z)) ** 2
+            )
+            
+            # 상위 3개 선택 (3개 이하일 경우 모두 선택)
+            location_id_simil = [loc.location_name for loc in sorted_locations[:3]]
+            
+            # 리스트를 문장으로 변환
+            if location_id_simil:
+                location_sentence =  ", ".join(location_id_simil)
+            else:
+                location_sentence = "추천 위치가 없습니다."
+        else:
+            location_sentence = "추천 위치가 없습니다."
 
+        
+        # 추천 결과를 템플릿에 전달합니다.
+        messages.success(request, f"가장 많이 저장된 위치: {location_id_many}, 들어갈 수 있는 위치: {location_sentence}")
+        return redirect('index')
 
+    # GET 요청이 아닐 경우, 기본 템플릿을 반환합니다.
+    return redirect('index')
 
 
 def get_items_and_locations(request):

@@ -335,9 +335,10 @@
 </div>
 
 <div class="container">
-<div class="form-container">
-    <h1>아이템 저장 위치 추천</h1>
+
+    
     <form method="GET" action="{% url 'recommend_storage' %}">
+        <h1>아이템 저장 위치 추천</h1>
         <div class="form-group">
             <label for="itemName">아이템 이름:</label>
             <input type="text" id="itemName" name="item_name" placeholder="아이템 이름 입력..." required>
@@ -356,6 +357,16 @@
         </div>
         <button type="submit">추천 받기</button>
     </form>
+    {% if locations %}
+        <h2>추천된 위치:</h2>
+        <ul>
+            {% for location in locations %}
+                <li>{{ location.location_name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>추천된 위치가 없습니다.</p>
+    {% endif %}
 </div>
 
 
