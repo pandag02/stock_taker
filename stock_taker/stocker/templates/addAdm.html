@@ -343,7 +343,7 @@
 
 
         <div class="box">
-            <h1 style = "text-align: center;">알림 기록</h1>
+            <h1 style="text-align: center;">알림 기록</h1>
             <div class="form-group">
                 <label for="categorySelect">카테고리 선택:</label>
                 <select id="categorySelect" style="padding: 10px; width: 100%;">
@@ -360,45 +360,86 @@
                 <label for="searchInputN">검색:</label>
                 <input type="text" id="searchInputN" placeholder="검색..." onkeyup="filterNotifications()" style="padding: 10px; width: 100%;">
             </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="deleteSelected()" style="padding: 10px 20px; background-color: #ff6f61; color: white; border: none; cursor: pointer;">선택한 항목 삭제</button>
+            </div>
             <div class="table-container">
                 <table id="notificationTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
                     <thead>
                         <tr>
+                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">선택</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">아이템</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">알림 타입</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">알림 메시지</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">상태</th>
                             <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">업데이트 날짜</th>
-                                                                                        
                         </tr>
                     </thead>
                     <tbody>
                         {% for notification in notifications %}
                         <tr>
+                            <td style="border: 1px solid #ccc; padding: 10px;">
+                                <input type="checkbox" class="delete-checkbox" value="{{ notification.notification_id }}">
+                            </td>
                             <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.item.item_name }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;"> {{ notification.storage.location.lcategory.lcategory_name }}의 {{ notification.storage.location.location_name }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_type}}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.storage.location.lcategory.lcategory_name }}의 {{ notification.storage.location.location_name }}</td>
+                            <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_type }}</td>
                             <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_message }}</td>
                             <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.notification_status }}</td>
                             <td style="border: 1px solid #ccc; padding: 10px;">{{ notification.updated_at }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
+                            <td colspan="7" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            
         </div>
-    </div>
-
 
 
 
 
     <script>
+        function deleteSelected() {
+            var selectedIds = [];
+            var checkboxes = document.querySelectorAll('.delete-checkbox:checked');
+            checkboxes.forEach(function(checkbox) {
+                selectedIds.push(checkbox.value);
+            });
+        
+            if (selectedIds.length > 0) {
+                // Ajax로 서버에 삭제 요청 보내기
+                fetch("{% url 'delete_notifications' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 포함
+                    },
+                    body: JSON.stringify({ 'notification_ids': selectedIds })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 삭제가 성공하면, 페이지를 새로 고침하여 변경된 내용을 반영
+                        location.reload();
+                    } else {
+                        alert('삭제에 실패했습니다: ' + data.error);  // 오류 메시지 출력
+                    }
+                })
+                .catch(error => {
+                    alert('서버와의 통신 중 오류가 발생했습니다: ' + error.message);
+                });
+            } else {
+                alert('삭제할 항목을 선택해주세요.');
+            }
+        }
+
+
+
         function filterNotifications() {
             const input = document.getElementById('searchInputN');
             const filter = input.value.toLowerCase();

@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password, check_password  # check_p
 from django.http import JsonResponse  # JsonResponse를 임포트합니다.
 from datetime import date
 from django.db.models import Sum, Count, Q  # Sum을 임포트합니다.
-
+import json  # json 모듈 임포트
 
 #=================================================================
 #=================================================================
@@ -336,6 +336,31 @@ def delete_location(request):
         return redirect('add_adm')
 
     return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
+ 
+
+def delete_notifications(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            notification_ids = data.get("notification_ids", [])
+            
+            # 알림 삭제
+            if notification_ids:
+                with connection.cursor() as cursor:
+                    # SQL IN 절을 사용하여 여러 알림 삭제
+                    format_strings = ','.join(['%s'] * len(notification_ids))
+                    cursor.execute(f"DELETE FROM notifications WHERE notification_id IN ({format_strings})", notification_ids)
+                
+                messages.success(request, '알림이 성공적으로 삭제되었습니다.')
+                return JsonResponse({'success': True, 'success': '삭제하였습니다'})
+            else:
+                return JsonResponse({'success': False, 'error': '삭제할 알림 ID가 없습니다.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
 
 #=================================================================
 #=================================================================
