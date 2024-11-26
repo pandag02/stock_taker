@@ -37,6 +37,8 @@ urlpatterns = [
     path('add_location/', views.add_location, name='add_location'),
     path('delete_icategory', views.delete_icategory, name='delete_icategory'),
     path('delete_lcategory', views.delete_lcategory, name='delete_lcategory'),
+    path('delete_item/', views.delete_item, name='delete_item'),
+    path('delete_location/', views.delete_location, name='delete_location'),
     
     #index 페이지에서 이용
     path('store_item/', views.store_item, name='store_item'),

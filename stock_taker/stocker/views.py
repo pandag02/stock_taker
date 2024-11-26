@@ -11,6 +11,7 @@ from django.http import JsonResponse  # JsonResponse를 임포트합니다.
 from datetime import date
 from django.db.models import Sum, Count, Q  # Sum을 임포트합니다.
 
+
 #=================================================================
 #=================================================================
 #로그인, 로그아웃, 관리자 계정 접속 관련 코드 
@@ -108,7 +109,9 @@ def add_adm(request):
     icategories = Icategory.objects.all()  # 모든 카테고리를 가져옵니다.
     lcategories = Lcategory.objects.all()  # 모든 카테고리를 가져옵니다.
     activities = Activity.objects.all()
-    return render(request, 'addADM.html', {'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities})
+    items = Item.objects.all()
+    locations = Location.objects.all()
+    return render(request, 'addADM.html', { 'items': items, 'locations':locations, 'icategories': icategories, 'lcategories': lcategories, 'username' : username, 'user_id' : user_id, 'activities': activities})
 
 
 #=================================================================
@@ -291,7 +294,47 @@ def delete_lcategory(request):
 
     return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
 
+@csrf_exempt
+def delete_item(request):
+    username = request.session.get('username')  # 세션에서 사용자 이름 가져오기
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM item WHERE item_id = %s", [item_id])
+            messages.success(request, '아이템이 성공적으로 삭제되었습니다.')
+        except IntegrityError:
+            messages.error(request, '이 아이템은 다른 곳에서 사용 중입니다. 삭제할 수 없습니다.')
+        except Exception as e:
+            messages.error(request, '아이템 삭제 중 오류가 발생했습니다: {}'.format(str(e)))
 
+        items = Item.objects.all()
+        locations = Location.objects.all()
+        return redirect('add_adm')
+
+    return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
+
+@csrf_exempt
+def delete_location(request):
+    username = request.session.get('username')  # 세션에서 사용자 이름 가져오기
+    if request.method == 'POST':
+        location_id = request.POST.get('location_id')
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM location WHERE location_id = %s", [location_id])
+            messages.success(request, '위치가 성공적으로 삭제되었습니다.')
+        except IntegrityError:
+            messages.error(request, '이 위치는 다른 곳에서 사용 중입니다. 삭제할 수 없습니다.')
+        except Exception as e:
+            messages.error(request, '위치 삭제 중 오류가 발생했습니다: {}'.format(str(e)))
+
+        items = Item.objects.all()
+        locations = Location.objects.all()
+        return redirect('add_adm')
+
+    return JsonResponse({"error": "잘못된 요청입니다."}, status=400)
 
 #=================================================================
 #=================================================================
