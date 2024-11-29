@@ -41,6 +41,7 @@ urlpatterns = [
     path('delete_location/', views.delete_location, name='delete_location'),
     path('delete_notifications/', views.delete_notifications, name='delete_notifications'),
     path('email_notifications/', views.email_notifications, name='email_notifications'),
+    path('delete_activities/', views.delete_activities, name='delete_activities'),
     
     #index 페이지에서 이용
     path('store_item/', views.store_item, name='store_item'),

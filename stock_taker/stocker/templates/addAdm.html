@@ -292,52 +292,64 @@
 
     <div class="form-container">
         <div class="box">
-            <h1 style = "text-align: center;">사용 기록</h1>
-            <div class="form-group">
-                <label for="categorySelect">카테고리 선택:</label>
-                <select id="categorySelect" style="padding: 10px; width: 100%;">
-                    <option value="all">모두</option>
-                    <option value="activity_id">활동 ID</option>
-                    <option value="user">사용자</option>
-                    <option value="storage">저장소</option>
-                    <option value="quantity">사용 수량</option>
-                    <option value="date">사용 날짜</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="searchInput">검색:</label>
-                <input type="text" id="searchInput" placeholder="검색..." onkeyup="filterTable()" style="padding: 10px; width: 100%;">
-            </div>
-            <div class="table-container">
-                <table id="activityTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <thead>
-                        <tr>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">활동 ID</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용자</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 수량</th>
-                            <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 날짜</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for activity in activities %}
-                        <tr>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.activity_id }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.user.user_name }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.storage.item.item_name }} ({{ activity.storage.location.location_name }})</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.quantity_activity }}</td>
-                            <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.date_used }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <h1 style="text-align: center;">사용 기록</h1>
+<div class="form-group">
+    <label for="categorySelect">카테고리 선택:</label>
+    <select id="categorySelect" style="padding: 10px; width: 100%;">
+        <option value="all">모두</option>
+        <option value="activity_id">활동 ID</option>
+        <option value="user">사용자</option>
+        <option value="storage">저장소</option>
+        <option value="quantity">사용 수량</option>
+        <option value="date">사용 날짜</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="searchInput">검색:</label>
+    <input type="text" id="searchInput" placeholder="검색..." onkeyup="filterTable()" style="padding: 10px; width: 100%;">
+</div>
+
+<!-- 삭제 버튼 -->
+<div style="text-align: center; margin-top: 20px;">
+    <button onclick="deleteSelectedActivities()" style="padding: 10px 20px; background-color: #ff6f61; color: white; border: none; cursor: pointer;">
+        선택한 항목 삭제
+    </button>
+</div>
+
+<div class="table-container">
+    <table id="activityTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">선택</th>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">활동 ID</th>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용자</th>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">저장소</th>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 수량</th>
+                <th style="border: 1px solid #ccc; padding: 10px; background: #ff6f61; color: white;">사용 날짜</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+            <tr>
+                <td style="border: 1px solid #ccc; padding: 10px;">
+                    <input type="checkbox" class="delete-checkbox" value="{{ activity.activity_id }}">
+                </td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.activity_id }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.user.user_name }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.storage.item.item_name }} ({{ activity.storage.location.location_name }})</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.quantity_activity }}</td>
+                <td style="border: 1px solid #ccc; padding: 10px;">{{ activity.date_used }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="border: 1px solid #ccc; padding: 10px; text-align: center;">사용 기록이 없습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
         </div>
-    
+   
 
 
 
@@ -424,6 +436,41 @@
 
 
     <script>
+
+        function deleteSelectedActivities() {
+    var selectedIds = [];
+    var checkboxes = document.querySelectorAll('.delete-checkbox:checked');
+    checkboxes.forEach(function(checkbox) {
+        selectedIds.push(checkbox.value);
+    });
+
+    if (selectedIds.length > 0) {
+        // Ajax로 서버에 삭제 요청 보내기
+        fetch("{% url 'delete_activities' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // CSRF 토큰 포함
+            },
+            body: JSON.stringify({ 'activity_ids': selectedIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 삭제가 성공하면, 페이지를 새로 고침하여 변경된 내용을 반영
+                location.reload();
+            } else {
+                alert('삭제에 실패했습니다: ' + data.error);  // 오류 메시지 출력
+            }
+        })
+        .catch(error => {
+            alert('서버와의 통신 중 오류가 발생했습니다: ' + error.message);
+        });
+    } else {
+        alert('삭제할 항목을 선택해주세요.');
+    }
+}
+
 
         function filterUser() {
             // 사용자가 선택한 사용자 ID를 가져옵니다.

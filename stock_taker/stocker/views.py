@@ -412,6 +412,29 @@ def email_notifications(request):
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
+def delete_activities(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            activity_ids = data.get("activity_ids", [])
+            
+            # 활동 기록 삭제
+            if activity_ids:
+                with connection.cursor() as cursor:
+                    # SQL IN 절을 사용하여 여러 활동 기록 삭제
+                    format_strings = ','.join(['%s'] * len(activity_ids))
+                    cursor.execute(f"DELETE FROM activity WHERE activity_id IN ({format_strings})", activity_ids)
+                
+                messages.success(request, '사용 기록이 성공적으로 삭제되었습니다.')
+                return JsonResponse({'success': True, 'message': '삭제하였습니다'})
+            else:
+                return JsonResponse({'success': False, 'error': '삭제할 활동 ID가 없습니다.'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
 #=================================================================
 #=================================================================
 #index.html에서 사용할 것.
