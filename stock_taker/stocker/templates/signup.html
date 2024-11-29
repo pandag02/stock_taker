@@ -38,14 +38,49 @@
                 <select id="role" name="role" required>
                     <option value="">역할을 선택하세요</option>
                     <option value="adm">관리자</option>
-                    <option value="user">사용자</option>
+                    <option value="nor">사용자</option>
                 </select>
             </div>
             <button type="submit">회원가입</button>
         </form>
         <div id="error-message" class="error-message"></div>
     </div>
-    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // scripts.js
+
+document.addEventListener('DOMContentLoaded', function() {
+    const signupForm = document.getElementById('signupForm');
+    const errorMessageDiv = document.getElementById('error-message');
+
+    signupForm.addEventListener('submit', function(event) {
+        // 에러 메시지 초기화
+        errorMessageDiv.textContent = '';
+        
+        // 입력 값 가져오기
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const role = document.getElementById('role').value;
+
+        // 유효성 검사
+        if (username === '' || password === '' || email === '' || role === '') {
+            errorMessageDiv.textContent = '모든 필드를 입력해야 합니다.';
+            event.preventDefault(); // 폼 제출 방지
+            return;
+        }
+
+        // 이메일 형식 검사
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            errorMessageDiv.textContent = '유효한 이메일 주소를 입력하세요.';
+            event.preventDefault(); // 폼 제출 방지
+            return;
+        }
+    });
+});
+
+
+    </script>
 </body>
 
 

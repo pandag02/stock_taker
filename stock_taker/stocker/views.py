@@ -372,6 +372,11 @@ def email_notifications(request):
             
             # 알림이 존재하는 경우
             if notification_ids and user_id:
+                with connection.cursor() as cursor:
+                    # SQL IN 절을 사용하여 여러 알림의 상태를 SENT로 변경
+                    format_strings = ','.join(['%s'] * len(notification_ids))
+                    cursor.execute(f"UPDATE notifications SET notification_status = 'SENT' WHERE notification_id IN ({format_strings})", notification_ids)
+
                 # 해당 알림들의 메시지 가져오기
                 notifications = Notifications.objects.filter(notification_id__in=notification_ids)
                 notification_messages = [notif.notification_message for notif in notifications]
