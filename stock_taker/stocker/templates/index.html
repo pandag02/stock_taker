@@ -132,22 +132,22 @@
     {% csrf_token %}
     
     <!-- 아이템 카테고리 선택기 -->
-    <label for="icategory_id">아이템 카테고리 선택:</label>
-    <select id="icategory_id" name="icategory_id" onchange="filterItems()" required>
-        <option value="">카테고리 선택</option>
-        {% for icategory in icategories %}
-            <option value="{{ icategory.icategory_id }}">{{ icategory.icategory_name }}</option>
-        {% endfor %}
-    </select>
+<label for="icategorySelect">아이템 카테고리 선택:</label>
+<select id="icategorySelect" name="icategory_id" onchange="filterItems()" required>
+    <option value="">카테고리 선택</option>
+    {% for icategory in icategories %}
+        <option value="{{ icategory.icategory_id }}">{{ icategory.icategory_name }}</option>
+    {% endfor %}
+</select>
 
-    <!-- 아이템 선택기 -->
-    <label for="item_id">아이템 선택:</label>
-    <select id="item_id" name="item_id" required>
-        <option value="">아이템 선택</option>
-        {% for item in items %}
-            <option value="{{ item.item_id }}" data-icategory="{{ item.icategory.icategory_id }}">{{ item.item_name }}</option>
-        {% endfor %}
-    </select>
+<!-- 아이템 선택기 -->
+<label for="itemSelect">아이템 선택:</label>
+<select id="itemSelect" name="item_id" required>
+    <option value="">아이템 선택</option>
+    {% for item in items %}
+        <option value="{{ item.item_id }}" data-icategory="{{ item.icategory.icategory_id }}">{{ item.item_name }}</option>
+    {% endfor %}
+</select>
 
     <!-- 위치 카테고리 선택기 -->
     <label for="lcategory_id">위치 카테고리 선택:</label>
@@ -195,8 +195,8 @@
             {% csrf_token %}
             
             <!-- 카테고리 선택 -->
-            <label for="icategorySelect">아이템 카테고리 선택:</label>
-            <select id="icategorySelect" name="icategory_id" onchange="filterItemsByCategory()" required>
+            <label for="icategorySelect1">아이템 카테고리 선택:</label>
+            <select id="icategorySelect1" name="icategory_id" onchange="filterItemsByCategory()" required>
                 <option value="">카테고리 선택</option>
                 {% for category in icategories %}
                     <option value="{{ category.icategory_id }}">{{ category.icategory_name }}</option>
@@ -204,8 +204,8 @@
             </select>
         
             <!-- 아이템 선택 -->
-            <label for="itemSelect">아이템 선택:</label>
-            <select id="itemSelect" name="item_id" onchange="filterStoragesByItem()" required>
+            <label for="itemSelect1">아이템 선택:</label>
+            <select id="itemSelect1" name="item_id" onchange="filterStoragesByItem()" required>
                 <option value="">아이템 선택</option>
                 {% for item in items %}
                     <option value="{{ item.item_id }}" data-category="{{ item.icategory.icategory_id }}">
@@ -330,8 +330,8 @@
     <div class="box">
         <h1 style="text-align: center;">아이템 찾기</h1>
         <div class="form-group">
-            <label for="icategorySelect">카테고리 선택:</label>
-            <select id="icategorySelect" style="padding: 10px; width: 100%;" onchange="filterItems()">
+            <label for="icategorySelect2">카테고리 선택:</label>
+            <select id="icategorySelect2" style="padding: 10px; width: 100%;" onchange="filterItems1()">
                 <option value="">카테고리 선택</option>
                 {% for category in icategories %}
                 <option value="{{ category.icategory_id }}">{{ category.icategory_name }}</option>
@@ -340,7 +340,7 @@
         </div>
         <div class="form-group">
             <label for="itemNameInput">아이템 이름 입력:</label>
-            <input type="text" id="itemNameInput" placeholder="아이템 이름 입력..." onkeyup="filterItems()" style="padding: 10px; width: 100%;">
+            <input type="text" id="itemNameInput" placeholder="아이템 이름 입력..." onkeyup="filterItemsFind()" style="padding: 10px; width: 100%;">
         </div>
         <div class="table-container">
             <table id="itemTable" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
@@ -425,41 +425,62 @@
             });
     }
 
-
-
-
-
-
     function filterItems() {
         const selectedCategory = document.getElementById('icategorySelect').value;
+        const itemSelect = document.getElementById('itemSelect');
+        const items = itemSelect.getElementsByTagName('option');
+    
+        for (let i = 1; i < items.length; i++) { // 첫 번째 option은 "아이템 선택"이므로 1부터 시작
+            const itemCategory = items[i].getAttribute('data-icategory');
+            // 카테고리와 선택된 카테고리가 일치하는지 확인
+            if (selectedCategory === "" || itemCategory === selectedCategory) {
+                items[i].style.display = ""; // 일치하면 표시
+            } else {
+                items[i].style.display = "none"; // 일치하지 않으면 숨김
+            }
+        }
+    
+        // 첫 번째 항목을 다시 선택하지 않도록 초기화
+        itemSelect.value = "";
+    }
+    
+
+
+
+
+
+
+    function filterItems1() {
+        const selectedCategory = document.getElementById('icategorySelect2').value;
         const itemNameInput = document.getElementById('itemNameInput').value.toLowerCase();
         const table = document.getElementById('itemTable');
         const rows = table.getElementsByTagName('tr');
     
         for (let i = 1; i < rows.length; i++) { // 첫 번째 행은 헤더이므로 1부터 시작
-            const cells = rows[i].getElementsByTagName('td');
+            const rowCategory = rows[i].getAttribute('data-categoryi');
+            const itemNameCellValue = rows[i].getElementsByTagName('td')[0].textContent.toLowerCase();
             let rowVisible = true; // 기본적으로 행을 표시
     
             // 카테고리 필터링
-            if (selectedCategory) {
-                const rowCategory = rows[i].getAttribute('data-categoryi');
-                if (rowCategory !== selectedCategory) {
-                    rowVisible = false;
-                }
+            if (selectedCategory && rowCategory !== selectedCategory) {
+                rowVisible = false;
             }
     
             // 아이템 이름 필터링
-            const itemNameCellValue = cells[0].textContent.toLowerCase();
             if (itemNameInput && !itemNameCellValue.includes(itemNameInput)) {
                 rowVisible = false;
             }
     
             // 행의 표시 여부 설정
-            rows[i].style.display = rowVisible ? "" : "none"; // rowVisible이 true면 표시, false면 숨김
+            rows[i].style.display = rowVisible ? "" : "none";
         }
     }
-    function filterItems() {
-        const selectedCategory = document.getElementById('icategorySelect').value;
+    
+
+
+
+    function filterItemsFind() {
+        const selectedCategory = document.getElementById('icategorySelect2').value;
         const itemNameInput = document.getElementById('itemNameInput').value.toLowerCase();
         const table = document.getElementById('itemTable');
         const rows = table.getElementsByTagName('tr');
@@ -503,8 +524,8 @@
 
 
     function filterItemsByCategory() {
-        const selectedCategory = document.getElementById('icategorySelect').value;
-        const itemSelect = document.getElementById('itemSelect');
+        const selectedCategory = document.getElementById('icategorySelect1').value;
+        const itemSelect = document.getElementById('itemSelect1');
         const items = itemSelect.getElementsByTagName('option');
 
         for (let i = 0; i < items.length; i++) {
@@ -518,7 +539,7 @@
     }
 
     function filterStoragesByItem() {
-        const selectedItem = document.getElementById('itemSelect').value;
+        const selectedItem = document.getElementById('itemSelect1').value;
         const storageSelect = document.getElementById('storageSelect');
         const storages = storageSelect.getElementsByTagName('option');
 

@@ -258,7 +258,7 @@
                     <label for="item_id">아이템 선택:</label>
                     <select id="item_id" name="item_id" required>
                         {% for item in items %}
-                            <option value="{{ item.item_id }}">{{ item.item_name }}</option>
+                            <option value="{{ item.item_id }}">{{item.icategory.icategory_name}}의 {{ item.item_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -272,7 +272,7 @@
                     <label for="location_id">위치 선택:</label>
                     <select id="location_id" name="location_id" required>
                         {% for location in locations %}
-                            <option value="{{ location.location_id }}">{{ location.location_name }}</option>
+                            <option value="{{ location.location_id }}">{{location.lcategory.lcategory_name}}의 {{ location.location_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
