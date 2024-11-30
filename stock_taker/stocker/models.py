@@ -3,13 +3,15 @@ from django.db import models
 class Activity(models.Model):
     activity_id = models.AutoField(primary_key=True)
     user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
-    storage = models.ForeignKey('Storage', models.DO_NOTHING, blank=True, null=True)
     quantity_activity = models.IntegerField(blank=True, null=True)
     date_used = models.DateField(blank=True, null=True)
+    storage_text = models.CharField(max_length=255)
+    storage_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'activity'
+
 
 
 class AuthGroup(models.Model):
@@ -204,12 +206,12 @@ class User(models.Model):
 class Notifications(models.Model):
     notification_id = models.AutoField(primary_key=True)
     item = models.ForeignKey(Item, models.DO_NOTHING, blank=True, null=True)
-    storage = models.ForeignKey('Storage', models.DO_NOTHING, blank=True, null=True)
     notification_type = models.CharField(max_length=10)
     notification_message = models.CharField(max_length=255)
     notification_status = models.CharField(max_length=7, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    storage_id = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False

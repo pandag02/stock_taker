@@ -483,12 +483,20 @@ def use_item(request):
         quantity_activity = request.POST.get('quantity_activity')
         date_used = date.today()  # 사용된 날짜를 저장
         user_id = request.session.get('user_id')
-
+        
+        
+       
         try:
+             # storage_id로 Storage 객체를 가져옴
+            storage = Storage.objects.get(storage_id=storage_id)
+            
+            # storage 정보를 텍스트로 변환
+            storage_text = f"아이템 종류: {storage.item.icategory.icategory_name}의 {storage.item.item_name}, 위치: {storage.location.lcategory.lcategory_name}의 {storage.location.location_name}, 기존 수량: {storage.quantity_stored}"
+            
             with connection.cursor() as cursor:
                 cursor.execute(
-                    "CALL combine_quantity_activity_procedure(%s, %s, %s, %s)",
-                    [user_id, storage_id, quantity_activity, date_used]
+                    "CALL combine_quantity_activity_procedure(%s, %s, %s, %s, %s)",
+                    [user_id, storage_text, quantity_activity, date_used, storage_id]
                 )
             messages.success(request, '아이템이 성공적으로 사용되었습니다.')
             return redirect('index')
